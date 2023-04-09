@@ -1,128 +1,131 @@
 {% extends 'flatpages/default.html' %}
-{% load static %}
 {% load custom_filters %}
 
-{% block idpage %}news{% endblock %}
 
 {% block title %}
-Поиск
-{% endblock %}
-
-{% block header %}
-Поиск публикаций
-{% endblock %}
-
-{% block count %}
-    {% if is_paginated %}
-        Показано публикаций: {{ posts|length }} из {{ filter.qs|length }}
-    {% else %}
-        Всего публикаций: {{ posts|length }}
-    {% endif %}
-{% endblock %}
-
-{% block image %}
-{% static 'assets/new.jpg' %}
-{% endblock %}
-
-{% block form %}
-<!-- Форма для поиска -->
-<form method="GET" name="search">
-    {{ filter.form }}
-    <input class="btn-btn" type="submit" value="Найти">
-</form>
-{% endblock %}
-
+Search
+{% endblock title %}
 
 {% block content %}
 
-{% for post in posts %}
-<h2 class="fw-bolder mb-4 mt-5 news-header">{{ post.title|censor:'*' }}</h2>
-    <p class="text-muted fst-italic mb-2">Дата публикации: {{ post.dateCreated|date:'d-m-Y H:i' }}</p>
-    <div class="post-box">
-        <p class="fs-5 mb-4 post-text">{{ post.text|censor:'*'|truncatechars:50 }}</p>
-        <p class="block-btn"><a class="btn btn-text" href="{% url 'post' post.pk %}">Читать новость</a></p>
-        <p class="block-btn"><a class="btn btn-text" href="{% url 'edit' post.pk %}">Редактировать</a></p>
-        <p class="block-btn"><a class="btn btn-text" href="{% url 'delete' post.pk %}">Удалить</a></p>
+  <style>
+   a {color: black; text-decoration: none;}
+   a:visited {color: black /* Цвет посещенной ссылки */}
+   a:hover {color: blue; /* Цвет ссылки при наведении */}
+  </style>
+    <h1>Поиск публикаций:</h1>
+
+
+
+<!--            <form method="GET">-->
+<!--                {{ filter.form }}-->
+<!--                <input type="submit" value="Найти"></br></br></br>-->
+<!--            </form>-->
+<!-- форму заменил на input и select так как форма не дает возможность красиво вывести названия и -->
+<!-- дату с календарем для удобства ввода. В задании модуля нет задачи выводить фильтр через формы -->
+
+
+
+            <form method="GET">
+            <div style="float:left; width:75%; height:45px; line-height:20px">
+
+                <label for="dateCreation">Начиная с даты:</label>
+                <input type="date" id="dateCreation" name="dateCreation__gt">
+
+                <label for="title">По названию:</label>
+                <input type="text" id="title" name="title__icontains">
+
+                <label for="author">По автору:</label>
+                <select name="author" id="author">
+                    <option value="0">---------</option>
+                    <option value="1">Васильков.А.Н.</option>
+                    <option value="2">Петров.В.В.</option>
+                    <option value="3">Сидоров.А.А.</option>
+                </select>
+            </div>
+            <div style="float:left; width:25%; height:45px; line-height:35px">
+                <button type="submit" class="btn btn-secondary">search</button>
+            </div>
+            </form>
+        </br>
+        <span style ="color: grey;">Общее количество всех публикаций на сайте: {{ all_posts|length }}</span></br>
+        <span style ="color: grey;">Найдено: {{ paginator.count }} публикаций. Выведено по {{ list_in_page }} публикаций на странице, всего страниц: {{ paginator.num_pages }}</span>
+
         <hr>
-    </div>
-{% endfor %}
+
+<!-- Закоментирован код, выводящий список публикций через форму фильтра -->
+
+<!--<table>-->
+<!--    <thead>-->
+<!--        <th>Наименование:</th>-->
+<!--        <th>Автор:</th>-->
+<!--        <th>Дата:</th>-->
+<!--    </thead>-->
+<!--    {% for product in filter.qs %} &lt;!&ndash; поменяем products на filter.qs, т. к. теперь мы забираем уже отобранную по каким-то параметрам информацию &ndash;&gt;-->
+<!--    <tr>-->
+<!--        <td>{{ product.title|title }}</td>-->
+<!--        <td>{{ product.author.authorUser|title }}</td>-->
+<!--        <td>{{ product.dateCreation }}</td>-->
+<!--    </tr>-->
+<!--    {% endfor %}-->
+<!--</table>-->
 
 
-<!-- Если пагинация поддерживается -->
 
-{% if is_paginated %}
-    <ul class="pagination">
-
-        {% if page_obj.number == 1 %}
-            <li class="pagination-item run passive">
-                <span><<</span>
-            </li>
-        {% endif %}
-
-        {% if page_obj.has_previous %}
-
-            {% if page_obj.number > 1 %}
-                <li class="pagination-item run">
-                    <a class="activ" href="?page={{ page_obj.previous_page_number }}{{ request.get_full_path|is_filters_uses }}"><<</a>
-                </li>
-            {% endif %}
-
-            {% if page_obj.number|add:'-2' > 1 %}
-                <li class="pagination-item">
-                    <a class="pagination-link" href="?page=1{{ request.get_full_path|is_filters_uses }}">1</a>
-                </li>
-            {% endif %}
-
-            {% if page_obj.number|add:'-2' >= 3 %}
-                <li class="pagination-item passive">
-                    <span>. . .</span>
-                </li>
-            {% endif %}
-        {% endif %}
-
-        {% if paginator.page_range|length > 1 %}
-            {% for i in paginator.page_range %}
-                {% if page_obj.number == i %}
-                    <li class="pagination-item active">
-                        <a class="pagination-link" href="?page={{ i }}{{ request.get_full_path|is_filters_uses }}">{{ i }}</a>
-                    </li>
-                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
-                    <li class="pagination-item">
-                        <a class="pagination-link" href="?page={{ i }}{{ request.get_full_path|is_filters_uses }}">{{ i }}</a>
-                    </li>
+        {% if post_search %}
+            {% for itemnews in object_list %}
+            {% autoescape off %}
+            <a href="{{ itemnews.id }}" style="font-size: 20px;"><b>{{ itemnews.title|censor }}</b></a></br>
+            {% endautoescape %}
+            {% for key, value in itemnews.CATEGORY_CHOICES %}
+                {% if key == itemnews.categoryType %}
+                    <span><b>{{value}}</b>,</span>
                 {% endif %}
             {% endfor %}
+            <span>дата публикации: {{ itemnews.dateCreation|date:'d.M.Y' }}, рейтинг: {{ itemnews.rating }} ({{ itemnews.author }})</span></br>
+            <span>Категория: </span>
+            {% for category in itemnews.postCategory.all %}
+                <span>{{ category.name}} </span>
+            {% endfor %}
+            {% autoescape off %}
+            </br>{{ itemnews.text|truncatechars:50|censor }}</br></br>
+            {% endautoescape %}
+            {% endfor %}
+
+        {% else %}
+            <h2>По заданным параметрам поиска публикаций нет!</h2>
         {% endif %}
+    <hr>
 
-        {% if page_obj.has_next %}
-            {% if page_obj.number|add:'2' < page_obj.paginator.num_pages %}
-                <li class="pagination-item passive">
-                    <span>. . .</span>
-                </li>
-            {% endif %}
+{% load my_tags %}
+{% comment %} подгружаем tamplate tags для правильной генерации ссылок. До этого мы создали файлы в папке templatetags {% endcomment %}
 
-            {% if page_obj.number|add:'2' < page_obj.paginator.num_pages %}
-                <li class="pagination-item">
-                    <a class="pagination-link" href="?page={{ page_obj.paginator.num_pages }}{{ request.get_full_path|is_filters_uses }}">
-                        {{ page_obj.paginator.num_pages }}
-                    </a>
-                </li>
-            {% endif %}
+<!-- Проверяем что поддерживается постраничный вывод -->
+{% if is_paginated %}
+<span>Страницы: </span>
+  {% if page_obj.has_previous %}
+    <a href="?{% param_replace page=1 %}">Первая</a><span>&nbsp;</span>
+    <a href="?{% param_replace page=page_obj.previous_page_number %}"><</a>
+  {% endif %}
 
-            {% if page_obj.number < paginator.page_range|length %}
-                <li class="pagination-item run">
-                    <a class="activ" href="?page={{ page_obj.next_page_number }}{{ request.get_full_path|is_filters_uses }}">>></a>
-                </li>
-            {% endif %}
-        {% endif %}
+<!-- Показываем только текущую страницу и ближайшие к ней, чтобы список не тянулся и не захламлял страницу -->
+{% for num in page_obj.paginator.page_range %}
+    {% if page_obj.number == num %}
+<a><b>{{ page_obj.number }}</b></a><span>&nbsp;</span>
+    {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+        <a href="?{% param_replace page=num %}">{{ num }}</a><span>&nbsp;</span>
+    {% endif %}
+{% endfor %}
 
-        {% if page_obj.number == paginator.page_range|length %}
-            <li class="pagination-item run passive">
-                <span>>></span>
-            </li>
-        {% endif %}
+  <!-- Если есть следующая страница, то даём ссылку на неё и на самую последнюю страницу -->
+  {% if page_obj.has_next %}
+    <a href="?{% param_replace page=page_obj.next_page_number %}">></a><span>&nbsp;</span>
+    <a href="?{% param_replace page=paginator.num_pages %}">Последняя</a>
+  {% endif %}
 
-    </ul>
+  <span style ="color: grey;">&nbsp;&nbsp;(Показаны публикации с {{ page_obj.start_index }} по {{ page_obj.end_index }})</span>
 {% endif %}
-
-{% endblock %}
+</br></br>
+<input type=button value="Назад" class="btn btn-secondary" onClick="javascript:history.go(-1);">
+</br></br>
+{% endblock content %}
