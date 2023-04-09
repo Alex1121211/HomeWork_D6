@@ -1,4 +1,4 @@
-# moduleD5_homework
+# moduleD6_homework
 
 - python -m venv venv
 - venv\scripts\activate
